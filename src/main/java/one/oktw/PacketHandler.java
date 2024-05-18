@@ -13,6 +13,8 @@ import one.oktw.mixin.core.ClientConnection_AddressAccessor;
 import one.oktw.mixin.core.ServerLoginNetworkHandlerAccessor;
 import org.apache.logging.log4j.LogManager;
 
+import java.util.Optional;
+
 class PacketHandler {
     private final ModConfig config;
 
@@ -55,11 +57,11 @@ class PacketHandler {
                 return;
             }
             if (config.getallowBypassProxy() && !understood) {
-                handler.onHello(new LoginHelloC2SPacket(profile.getName(), profile.getId()));
+                handler.onHello(new LoginHelloC2SPacket(profile.getName(), Optional.ofNullable(profile.getId())));
                 return;
             }
             if (config.getHackEarlySend()) {
-                handler.onHello(new LoginHelloC2SPacket(profile.getName(), profile.getId()));
+                handler.onHello(new LoginHelloC2SPacket(profile.getName(), Optional.ofNullable(profile.getId())));
             }
 
             ((ServerLoginNetworkHandlerAccessor) handler).setProfile(profile);
