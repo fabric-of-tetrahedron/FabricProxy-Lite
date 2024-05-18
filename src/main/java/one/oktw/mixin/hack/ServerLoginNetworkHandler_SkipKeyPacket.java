@@ -8,6 +8,8 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 
+import java.net.SocketAddress;
+
 @Mixin(ServerLoginNetworkHandler.class)
 public class ServerLoginNetworkHandler_SkipKeyPacket {
     @Redirect(method = "onHello", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/ClientConnection;isLocal()Z"))
@@ -15,8 +17,8 @@ public class ServerLoginNetworkHandler_SkipKeyPacket {
         // To make local address (Velocity) be able to connect the server. 
         // WARN: This also allows local players to join the server without login.
         if (FabricProxyLite.config.getAllowLocalOffline()) {
-            String ip = connection.getAddressAsString(true);
-            if (ip.startsWith(FabricProxyLite.config.getLocalIp())){
+            String ip = getAddressAsString(connection.getAddress(), true);
+            if (ip.startsWith(FabricProxyLite.config.getLocalIp())) {
                 return true;
             }
             return false;
@@ -29,5 +31,14 @@ public class ServerLoginNetworkHandler_SkipKeyPacket {
         if (!FabricProxyLite.config.getallowBypassProxy())
             return false;
         return minecraftServer.isOnlineMode();
+    }
+
+
+    private String getAddressAsString(SocketAddress address, boolean logIps) {
+        if (address == null) {
+            return "local";
+        } else {
+            return logIps ? address.toString() : "IP hidden";
+        }
     }
 }
